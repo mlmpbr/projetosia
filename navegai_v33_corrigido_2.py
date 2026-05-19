@@ -2004,3 +2004,4 @@ with tab_prompts:
     st.divider()
     st.caption("v3.3 | Arquitetura Determinística | Cloud SQL")
 
+"" 
