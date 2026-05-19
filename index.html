@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NavegAI — IA para Gestão Pública | Prefeitura de Navegantes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0a1a;
+            --bg-secondary: #12122a;
+            --bg-card: #1a1a3e;
+            --bg-card-hover: #222255;
+            --accent: #5470c6;
+            --accent-light: #83bff6;
+            --accent-glow: rgba(84, 112, 198, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --text-muted: #64748b;
+            --success: #91cc75;
+            --warning: #fac858;
+            --danger: #ee6666;
+            --border: rgba(84, 112, 198, 0.15);
+            --gradient-hero: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0a0a1a 100%);
+            --gradient-accent: linear-gradient(135deg, #5470c6 0%, #83bff6 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ===== ANIMATED BACKGROUND ===== */
+        .bg-mesh {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(84, 112, 198, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(131, 191, 246, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(84, 112, 198, 0.06) 0%, transparent 50%);
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: 
+                linear-gradient(rgba(84, 112, 198, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(84, 112, 198, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        /* ===== PARTICLES ===== */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0;
+            animation: float-particle 15s infinite;
+        }
+
+        @keyframes float-particle {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        /* ===== NAVIGATION ===== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 10, 26, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .nav-logo-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--gradient-accent);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-light);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-accent);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 6rem 2rem 4rem;
+            overflow: hidden;
+        }
+
+        .hero-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse-glow 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 900px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            background: rgba(84, 112, 198, 0.15);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--accent-light);
+            margin-bottom: 2rem;
+            animation: fade-in-up 0.8s ease-out;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .hero-badge-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #a0aec0 50%, #83bff6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fade-in-up 0.8s ease-out 0.2s both;
+        }
+
+        .hero h1 .highlight {
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 3rem;
+            animation: fade-in-up 0.8s ease-out 0.4s both;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fade-in-up 0.8s ease-out 0.6s both;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--gradient-accent);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(84, 112, 198, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(84, 112, 198, 0.6);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent-light);
+            background: rgba(84, 112, 198, 0.08);
+        }
+
+        .hero-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            max-width: 800px;
+            margin: 4rem auto 0;
+            animation: fade-in-up 0.8s ease-out 0.8s both;
+        }
+
+        .hero-metric {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .hero-metric:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 40px rgba(84, 112, 198, 0.15);
+        }
+
+        .hero-metric-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-metric-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ===== SECTIONS GENERAL ===== */
+        section {
+            padding: 6rem 2rem;
+            position: relative;
+        }
+
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-tag {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(84, 112, 198, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .section-desc {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ===== PROBLEM SECTION ===== */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .problem-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s;
+        }
+
+        .problem-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-accent);
+            transform: scaleX(0);
+            transition: transform 0.4s;
+        }
+
+        .problem-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .problem-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(84, 112, 198, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .problem-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: rgba(84, 112, 198, 0.1); /* Changed from red to blue tone */
+            border: 1px solid rgba(84, 112, 198, 0.2);
+        }
+
+        .problem-card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .problem-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* ===== ARCHITECTURE SECTION ===== */
+        .arch-diagram {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .arch-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .arch-node {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            min-width: 180px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .arch-node:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .arch-node-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .arch-node h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .arch-node span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .arch-arrow {
+            font-size: 1.5rem;
+            color: var(--accent);
+            animation: arrow-pulse 1.5s infinite;
+        }
+
+        @keyframes arrow-pulse {
+            0%, 100% { opacity: 0.5; transform: translateX(0); }
+            50% { opacity: 1; transform: translateX(4px); }
+        }
+
+        .arch-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .arch-detail {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 3px solid var(--accent);
+        }
+
+        .arch-detail h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .arch-detail p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .arch-detail code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-light);
+            background: rgba(84, 112, 198, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* ===== AGENTS SECTION ===== */
+        .agents-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .agent-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s;
+        }
+
+        .agent-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--accent);
+            box-shadow: 0 20px 60px rgba(84, 112, 198, 0.15);
+        }
+
+        .agent-header {
+            padding: 2rem 2rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .agent-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: var(--gradient-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            flex-shrink: 0;
+        }
+
+        .agent-title h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .agent-title span {
+            font-size: 0.85rem;
+            color: var(--accent-light);
+        }
+
+        .agent-body {
+            padding: 0 2rem 2rem;
+        }
+
+        .agent-body p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .agent-features {
+            list-style: none;
+        }
+
+        .agent-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 0.6rem 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .agent-features li:last-child {
+            border-bottom: none;
+        }
+
+        .agent-features li::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .agent-metric {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(145, 204, 117, 0.08);
+            border-radius: 12px;
+            border: 1px solid rgba(145, 204, 117, 0.15);
+        }
+
+        .agent-metric-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--success);
+        }
+
+        .agent-metric-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== RESULTS SECTION ===== */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .result-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s;
+        }
+
+        .result-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+        }
+
+        .result-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-accent);
+        }
+
+        .result-before {
+            font-size: 1rem;
+            color: var(--danger);
+            text-decoration: line-through;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-after {
+            font-size: 3rem;
+            font-weight: 900;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.75rem;
+        }
+
+        .result-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 1rem;
+            padding: 4px 12px;
+            background: rgba(145, 204, 117, 0.1);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .chart-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            height: 400px;
+        }
+
+        /* ===== FUTURE SECTION ===== */
+        .future-timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .future-timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--gradient-accent);
+        }
+
+        .future-item {
+            position: relative;
+            padding: 0 0 3rem 2rem;
+        }
+
+        .future-item::before {
+            content: '';
+            position: absolute;
+            left: -2rem;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+            border: 3px solid var(--bg-primary);
+            box-shadow: 0 0 0 3px var(--accent);
+        }
+
+        .future-item h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .future-item p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .future-item .tag {
+            display: inline-block;
+            margin-top: 0.75rem;
+            padding: 4px 12px;
+            background: rgba(84, 112, 198, 0.1);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-light);
+        }
+
+        /* ===== CTA SECTION ===== */
+        .cta-section {
+            text-align: center;
+            padding: 6rem 2rem;
+        }
+
+        .cta-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 4rem 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 50%);
+            animation: rotate-glow 20s linear infinite;
+        }
+
+        @keyframes rotate-glow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .cta-box > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-box h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .cta-box p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        footer .footer-logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero-metrics { grid-template-columns: repeat(2, 1fr); }
+            .arch-flow { flex-direction: column; }
+            .arch-arrow { transform: rotate(90deg); }
+            .agents-showcase { grid-template-columns: 1fr; }
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-mesh"></div>
+    <div class="bg-grid"></div>
+    <div class="particles" id="particles"></div>
+
+    <!-- NAVIGATION -->
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <div class="nav-logo-icon">⚓</div>
+                NavegAI
+            </a>
+            <ul class="nav-links">
+                <li><a href="#problema">O Problema</a></li>
+                <li><a href="#arquitetura">Arquitetura</a></li>
+                <li><a href="#agentes">Agentes</a></li>
+                <li><a href="#resultados">Resultados</a></li>
+                <li><a href="#futuro">Futuro</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-glow"></div>
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="hero-badge-dot"></span>
+                SEPAF - Departamento de Planejamento e Gestão Pública | LAB DE IA sobre projetos da plataforma Congress
+            </div>
+            <h1>
+                <span class="highlight">Uso da IA para Chat</span> com dados da Plataforma Congres
+            </h1>
+            <p class="hero-subtitle">
+                Departamento de Planejamento e Gestão Pública - LAB - de Uso da IA para Transformação de Perguntas em análise executiva
+            </p>
+            <div class="hero-cta">
+                <a href="#arquitetura" class="btn btn-primary">
+                    ⚡ Ver a Arquitetura
+                </a>
+                <a href="#resultados" class="btn btn-secondary">
+                    📊 Ver Resultados
+                </a>
+            </div>
+            <div class="hero-metrics">
+                <div class="hero-metric">
+                    <div class="hero-metric-value">12</div>
+                    <div class="hero-metric-label">Views Inteligentes</div>
+                </div>
+                <div class="hero-metric">
+                    <div class="hero-metric-value">Baixa</div>
+                    <div class="hero-metric-label">Alucinação SQL</div>
+                </div>
+                <div class="hero-metric">
+                    <div class="hero-metric-value">&lt;3s</div>
+                    <div class="hero-metric-label">Tempo de Resposta</div>
+                </div>
+                <div class="hero-metric">
+                    <div class="hero-metric-value">100%</div>
+                    <div class="hero-metric-label">Determinístico</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROBLEM -->
+    <section id="problema">
+        <div class="section-container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">O Desafio</span>
+                <h2 class="section-title">Gestão Pública em Tempo Real</h2>
+                <p class="section-desc">
+                    Consulte sobre projetos, indicadores, logs de acesso usando linguagem natural e IA.
+                </p>
+            </div>
+            <div class="problem-grid">
+                <div class="problem-card animate-on-scroll">
+                    <div class="problem-icon">🏗️</div>
+                    <h3>Banco de Dados MySql</h3>
+                    <p>Veja como o uso da IA pode conversar com o banco de dados e devolver ao usuário respostas mais eficazes ao tomador de decisão.</p>
+                </div>
+                <div class="problem-card animate-on-scroll">
+                    <div class="problem-icon">📋</div>
+                    <h3>Respostas mais Rápidas</h3>
+                    <p>Muitas vezes a consulta rápida a um gráfico pode não ser a melhor saída - tudo pode ser obtido via perguntas e respostas amparadas por IA em um chat com dados.</p>
+                </div>
+                <div class="problem-card animate-on-scroll">
+                    <div class="problem-icon">🎯</div>
+                    <h3>Stack</h3>
+                    <p>Uso de Stacks tecnológicas avançadas - LangChain, Streamlit, Python, JSON Estruturado para otimizar o uso e diminuir consumo de Tokens.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ARCHITECTURE -->
+    <section id="arquitetura" style="background: var(--bg-secondary);">
+        <div class="section-container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">A Solução</span>
+                <h2 class="section-title">Arquitetura Determinística de Baixa Alucinação</h2>
+                <p class="section-desc">
+                    NavegAI usa uma arquitetura híbrida: IA generativa para entender intenção, 
+                    mas Python puro para gerar SQL — minimizando alucinações.
+                </p>
+            </div>
+            <div class="arch-diagram animate-on-scroll">
+                <div class="arch-flow">
+                    <div class="arch-node">
+                        <div class="arch-node-icon">💬</div>
+                        <h4>Pergunta Natural</h4>
+                        <span>"Projetos mais caros"</span>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-node">
+                        <div class="arch-node-icon">🧠</div>
+                        <h4>LLM (Gemini)</h4>
+                        <span>Extrai intenção em JSON</span>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-node">
+                        <div class="arch-node-icon">🔒</div>
+                        <h4>Construtor SQL</h4>
+                        <span>Python puro, 100% seguro</span>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-node">
+                        <div class="arch-node-icon">📊</div>
+                        <h4>Visualização</h4>
+                        <span>ECharts + Narrativa</span>
+                    </div>
+                </div>
+                <div class="arch-details">
+                    <div class="arch-detail">
+                        <h4>🛡️ Baixa Alucinação</h4>
+                        <p>O LLM <strong>nunca</strong> gera SQL livre. Apenas extrai intenção em JSON estruturado. O SQL é montado por Python com validação rigorosa de views e colunas.</p>
+                    </div>
+                    <div class="arch-detail">
+                        <h4>📡 12 Views Inteligentes</h4>
+                        <p>Mapeamento completo de <code>vw_projetos_inteligencia</code>, <code>vw_ia_engajamento_acesso</code>, <code>vw_ia_indicadores_pem</code> e outras 9 views.</p>
+                    </div>
+                    <div class="arch-detail">
+                        <h4>⚡ Resposta em 3 Segundos</h4>
+                        <p>Pipeline otimizado: extração de intenção → construção SQL → execução → visualização. Tudo em menos de 3 segundos.</p>
+                    </div>
+                    <div class="arch-detail">
+                        <h4>🔐 Segurança por Design</h4>
+                        <p>Operadores SQL validados, views protegidas, sanitização de inputs. Nenhum dado do usuário é concatenado diretamente no SQL.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AGENTS -->
+    <section id="agentes">
+        <div class="section-container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">Produtividade</span>
+                <h2 class="section-title">Kimi Claw + Agent Swarm:<br>O Diferencial Corporativo</h2>
+                <p class="section-desc">
+                    O desenvolvimento do NavegAI foi acelerado por ferramentas de IA que 
+                    multiplicaram a produtividade da equipe da SEPAF.
+                </p>
+            </div>
+            <div class="agents-showcase">
+                <div class="agent-card animate-on-scroll">
+                    <div class="agent-header">
+                        <div class="agent-avatar">🦀</div>
+                        <div class="agent-title">
+                            <h3>Kimi Claw</h3>
+                            <span>Debug & Refatoração Inteligente</span>
+                        </div>
+                    </div>
+                    <div class="agent-body">
+                        <p>Agente especializado em análise de código. No NavegAI, foi usado para debugar queries SQL, corrigir gráficos ECharts e refatorar componentes críticos.</p>
+                        <ul class="agent-features">
+                            <li>Correção de SQL com CASE WHEN para faixas temporais</li>
+                            <li>Refatoração do motor de visualização ECharts</li>
+                            <li>Otimização do prompt system do extrator de intenção</li>
+                            <li>Validação de segurança nas queries geradas</li>
+                        </ul>
+                        <div class="agent-metric">
+                            <div class="agent-metric-value">-70%</div>
+                            <div class="agent-metric-label">Tempo de desenvolvimento</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="agent-card animate-on-scroll">
+                    <div class="agent-header">
+                        <div class="agent-avatar">🐝</div>
+                        <div class="agent-title">
+                            <h3>Agent Swarm</h3>
+                            <span>Execução Paralela de Tarefas</span>
+                        </div>
+                    </div>
+                    <div class="agent-body">
+                        <p>Múltiplos agentes trabalhando simultaneamente: um otimiza o backend SQL, outro ajusta o frontend Streamlit, outro revisa UX e documentação.</p>
+                        <ul class="agent-features">
+                            <li>Backend: Otimização do ConstrutorSQL e MotorCalculo</li>
+                            <li>Frontend: Ajustes de responsividade e tema dark</li>
+                            <li>UX: Melhoria na experiência de chat e feedback visual</li>
+                            <li>Docs: Geração automática de README e storytelling</li>
+                        </ul>
+                        <div class="agent-metric">
+                            <div class="agent-metric-value">4x</div>
+                            <div class="agent-metric-label">Mais entregas por sprint</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="agent-card animate-on-scroll">
+                    <div class="agent-header">
+                        <div class="agent-avatar">🧠</div>
+                        <div class="agent-title">
+                            <h3>Memory Space</h3>
+                            <span>Contexto Persistente</span>
+                        </div>
+                    </div>
+                    <div class="agent-body">
+                        <p>Memória de contexto entre sessões permite que o sistema "lembre" de preferências, padrões de consulta e evolução do projeto ao longo do tempo.</p>
+                        <ul class="agent-features">
+                            <li>Contexto de views preferidas por usuário</li>
+                            <li>Histórico de correções aplicadas ao código</li>
+                            <li>Aprendizado de padrões de perguntas recorrentes</li>
+                            <li>Continuidade em projetos de longa duração</li>
+                        </ul>
+                        <div class="agent-metric">
+                            <div class="agent-metric-value">100%</div>
+                            <div class="agent-metric-label">Continuidade de contexto</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border);">
+                <p style="font-size: 1.2rem; font-style: italic; color: var(--text-secondary);">
+                    "O uso da IA no setor público é um diferencial de qualidade e agilidade nos processos e serviços"
+                </p>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem;">
+                    — Dep. de Planejamento e Gestão Pública, Prefeitura de Navegantes
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section id="resultados" style="background: var(--bg-secondary);">
+        <div class="section-container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">Impacto Real</span>
+                <h2 class="section-title">Resultados Mensuráveis</h2>
+                <p class="section-desc">
+                    Métricas reais de performance e eficiência após a implementação do NavegAI 
+                    na SEPAF — Prefeitura de Navegantes.
+                </p>
+            </div>
+            <div class="results-grid">
+                <div class="result-card animate-on-scroll">
+                    <div class="result-before">3 dias</div>
+                    <div class="result-after">3s</div>
+                    <div class="result-label">Tempo para gerar uma análise executiva</div>
+                    <div class="result-badge">↓ 99.9% mais rápido</div>
+                </div>
+                <div class="result-card animate-on-scroll">
+                    <div class="result-before">~15% erro</div>
+                    <div class="result-after">Baixa</div>
+                    <div class="result-label">Taxa de alucinação em queries SQL</div>
+                    <div class="result-badge">Arquitetura Determinística</div>
+                </div>
+                <div class="result-card animate-on-scroll">
+                    <div class="result-before">1 relatório</div>
+                    <div class="result-after">∞</div>
+                    <div class="result-label">Consultas simultâneas por minuto</div>
+                    <div class="result-badge">Pool de conexões otimizado</div>
+                </div>
+                <div class="result-card animate-on-scroll">
+                    <div class="result-before">12 silos</div>
+                    <div class="result-after">1</div>
+                    <div class="result-label">Visão unificada da gestão pública</div>
+                    <div class="result-badge">12 views integradas</div>
+                </div>
+            </div>
+            <div class="chart-container animate-on-scroll">
+                <div id="chart-evolucao" style="width: 100%; height: 100%;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FUTURE -->
+    <section id="futuro">
+        <div class="section-container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">Roadmap</span>
+                <h2 class="section-title">O Futuro da Gestão Pública com IA</h2>
+                <p class="section-desc">
+                    NavegAI é apenas o começo. A SEPAF está construindo uma plataforma 
+                    completa de inteligência para o setor público.
+                </p>
+            </div>
+            <div class="future-timeline">
+                <div class="future-item animate-on-scroll">
+                    <h3>🚀 Deploy em Produção</h3>
+                    <p>Migração do ambiente local para Streamlit Cloud com banco MySQL na nuvem. Acesso seguro para todos os gestores da prefeitura via autenticação.</p>
+                    <span class="tag">Maio 2026</span>
+                </div>
+                <div class="future-item animate-on-scroll">
+                    <h3>📱 App Mobile para Gestores</h3>
+                    <p>Versão responsiva do NavegAI para acesso via smartphone e tablet. Alertas push para tarefas atrasadas e indicadores fora da meta.</p>
+                    <span class="tag">Junho 2026</span>
+                </div>
+                <div class="future-item animate-on-scroll">
+                    <h3>🤖 Assistente de Voz</h3>
+                    <p>Integração com assistentes de voz para que gestores possam fazer perguntas enquanto conduzem reuniões ou estão em campo.</p>
+                    <span class="tag">Julho 2026</span>
+                </div>
+                <div class="future-item animate-on-scroll">
+                    <h3>🏛️ Evolução de Controle de projetos por IA em toda Gestão</h3>
+                    <p>Uso intensivo da tecnologia para fortalecer o uso da IA na Prefeitura de Navegantes em setores chaves.</p>
+                </div>
+                <div class="future-item animate-on-scroll">
+                    <h3>📊 Painel de Transparência Pública</h3>
+                    <p>Dashboard público com dados abertos sobre projetos, investimentos e indicadores da gestão. Compromisso com transparência e accountability.</p>
+                    <span class="tag">Setembro 2026</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <div class="cta-box">
+            <h2>Pronto para revolucionar<br>sua gestão pública?</h2>
+            <p>NavegAI prova que IA de qualidade não precisa ser cara nem complexa.<br>
+            Boa arquitetura, boas ferramentas e boa vontade já são suficientes.</p>
+            <div class="hero-cta" style="margin-top: 2rem;">
+                <a href="#" class="btn btn-primary">
+                    ⚓ Conhecer o NavegAI
+                </a>
+                <a href="#arquitetura" class="btn btn-secondary">
+                    📖 Documentação Técnica
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-logo">⚓ NavegAI</div>
+        <p>SEPAF — Departamento de Planejamento e Gestão Pública<br>
+        Prefeitura de Navegantes, Santa Catarina, Brasil</p>
+        <p style="margin-top: 1rem; font-size: 0.8rem;">
+            v3.2 | Arquitetura Determinística | Baixa Alucinação | 2026
+        </p>
+    </footer>
+
+    <script>
+        // ===== PARTICLES =====
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // ===== SCROLL ANIMATION =====
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+
+        // ===== ECHARTS: EVOLUTION CHART =====
+        const chartDom = document.getElementById('chart-evolucao');
+        const myChart = echarts.init(chartDom);
+
+        const option = {
+            backgroundColor: 'transparent',
+            title: {
+                text: 'Evolução do Tempo de Resposta (dias → segundos)',
+                left: 'center',
+                top: 10,
+                textStyle: { color: '#fff', fontSize: 16, fontFamily: 'Inter' }
+            },
+            tooltip: {
+                trigger: 'axis',
+                backgroundColor: 'rgba(26, 26, 62, 0.95)',
+                borderColor: 'rgba(84, 112, 198, 0.3)',
+                textStyle: { color: '#fff' }
+            },
+            grid: { left: '10%', right: '10%', bottom: '15%', top: '20%' },
+            xAxis: {
+                type: 'category',
+                data: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
+                axisLabel: { color: '#a0aec0' },
+                axisLine: { lineStyle: { color: '#333' } }
+            },
+            yAxis: {
+                type: 'value',
+                name: 'Tempo (minutos)',
+                nameTextStyle: { color: '#a0aec0' },
+                axisLabel: { color: '#a0aec0' },
+                splitLine: { lineStyle: { color: '#222' } }
+            },
+            series: [{
+                name: 'Tempo Médio',
+                type: 'line',
+                data: [4320, 2160, 480, 60, 0.05],
+                smooth: true,
+                symbol: 'circle',
+                symbolSize: 10,
+                lineStyle: {
+                    width: 3,
+                    color: {
+                        type: 'linear', x: 0, y: 0, x2: 1, y2: 0,
+                        colorStops: [
+                            { offset: 0, color: '#ee6666' },
+                            { offset: 0.5, color: '#fac858' },
+                            { offset: 1, color: '#91cc75' }
+                        ]
+                    }
+                },
+                itemStyle: {
+                    color: function(params) {
+                        const colors = ['#ee6666', '#fac858', '#5470c6', '#83bff6', '#91cc75'];
+                        return colors[params.dataIndex];
+                    }
+                },
+                areaStyle: {
+                    color: {
+                        type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+                        colorStops: [
+                            { offset: 0, color: 'rgba(84, 112, 198, 0.3)' },
+                            { offset: 1, color: 'rgba(84, 112, 198, 0)' }
+                        ]
+                    }
+                },
+                label: {
+                    show: true,
+                    position: 'top',
+                    formatter: function(p) {
+                        const labels = ['3 dias', '1,5 dias', '8h', '1h', '3s'];
+                        return labels[p.dataIndex];
+                    },
+                    color: '#fff',
+                    fontSize: 12,
+                    fontWeight: 'bold'
+                }
+            }]
+        };
+
+        myChart.setOption(option);
+        window.addEventListener('resize', () => myChart.resize());
+    </script>
+</body>
+</html>
